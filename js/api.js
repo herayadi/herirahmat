@@ -3,7 +3,7 @@
    ============================================ */
 
 const API = (() => {
-  const BASE_URL = 'http://localhost:8080/api';
+  const BASE_URL = CONFIG.API_BASE_URL;
 
   /**
    * Generic fetch wrapper

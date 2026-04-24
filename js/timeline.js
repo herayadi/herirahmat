@@ -23,16 +23,22 @@ const Timeline = (() => {
    */
   function _renderContent(experienceData) {
     let html = '';
+    const lang = I18n.getLanguage();
 
     experienceData.forEach((exp, index) => {
-      // First item is slightly expanded state by default to show it's interactive, or just keep them all closed. 
-      // Let's keep them all collapsed for a cleaner look, or maybe first is expanded. Let's make first one expanded.
       const isExpanded = index === 0;
       const cardClass = isExpanded ? 'card timeline-card expanded' : 'card timeline-card';
-      const toggleText = isExpanded ? 'Show Less' : 'Show Details';
+      const toggleText = isExpanded 
+        ? (lang === 'en' ? 'Show Less' : 'Sembunyikan') 
+        : (lang === 'en' ? 'Show Details' : 'Lihat Detail');
 
       const impactHtml = exp.impact.map(item => `<li>${item}</li>`).join('');
       const techHtml = exp.tech.map(tech => `<span class="tag">${tech}</span>`).join('');
+      
+      // Multi-language fields
+      const role = lang === 'en' ? (exp.roleEn || exp.role) : (exp.roleId || exp.role);
+      const description = lang === 'en' ? (exp.descriptionEn || exp.description) : (exp.descriptionId || exp.description);
+      const impactTitle = lang === 'en' ? 'Key Impact' : 'Dampak Utama';
 
       html += `
         <div class="timeline-item reveal" style="transition-delay: ${index * 100}ms">
@@ -41,15 +47,15 @@ const Timeline = (() => {
             <div class="${cardClass}">
               <div class="timeline-header">
                 <span class="timeline-date">${exp.period}</span>
-                <h3 class="timeline-role">${exp.role}</h3>
+                <h3 class="timeline-role">${role}</h3>
                 <div class="timeline-company">${exp.company}</div>
               </div>
               
               <div class="timeline-body">
-                <p class="timeline-description">${exp.description}</p>
+                <p class="timeline-description">${description}</p>
                 
                 <div class="timeline-impact">
-                  <h4>Key Impact</h4>
+                  <h4>${impactTitle}</h4>
                   <ul>
                     ${impactHtml}
                   </ul>
@@ -80,6 +86,7 @@ const Timeline = (() => {
    */
   function _bindEvents() {
     const toggles = container.querySelectorAll('.timeline-toggle');
+    const lang = I18n.getLanguage();
 
     toggles.forEach(toggle => {
       toggle.addEventListener('click', (e) => {
@@ -89,11 +96,11 @@ const Timeline = (() => {
 
         if (isExpanded) {
           card.classList.remove('expanded');
-          textSpan.textContent = 'Show Details';
+          textSpan.textContent = lang === 'en' ? 'Show Details' : 'Lihat Detail';
           e.currentTarget.setAttribute('aria-expanded', 'false');
         } else {
           card.classList.add('expanded');
-          textSpan.textContent = 'Show Less';
+          textSpan.textContent = lang === 'en' ? 'Show Less' : 'Sembunyikan';
           e.currentTarget.setAttribute('aria-expanded', 'true');
         }
       });
@@ -104,8 +111,6 @@ const Timeline = (() => {
    * Observer for smooth reveal on scrolling
    */
   function _initIntersectionObserver() {
-    // Note: If About section already initialized .reveal globally, we still need 
-    // to observe the newly added timeline items.
     const reveals = container.querySelectorAll('.reveal');
     const observer = new IntersectionObserver((entries, obs) => {
       entries.forEach(entry => {

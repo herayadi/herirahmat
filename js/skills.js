@@ -10,19 +10,15 @@ const Skills = (() => {
    */
   function init(data) {
     if (!container || !data.skills) return;
-    
     _renderContent(data.skills);
     _initIntersectionObserver();
-    
-    console.log('[Skills] Initialized');
   }
 
   /**
    * Render Skills DOM
    */
   function _renderContent(skillsData) {
-    // If backend returns Array, iterate properly. 
-    // If it's the static object fallback, Object.values will handle it.
+    const lang = I18n.getLanguage();
     const categories = Array.isArray(skillsData) ? skillsData : Object.values(skillsData);
     
     let html = '';
@@ -32,9 +28,10 @@ const Skills = (() => {
       
       category.items.forEach(skill => {
         let levelTerm = 'Basic';
-        if (skill.level >= 85) levelTerm = 'Expert';
-        else if (skill.level >= 70) levelTerm = 'Advanced';
-        else if (skill.level >= 50) levelTerm = 'Intermediate';
+        if (skill.level >= 85) levelTerm = lang === 'en' ? 'Expert' : 'Ahli';
+        else if (skill.level >= 70) levelTerm = lang === 'en' ? 'Advanced' : 'Lanjutan';
+        else if (skill.level >= 50) levelTerm = lang === 'en' ? 'Intermediate' : 'Menengah';
+        else levelTerm = lang === 'en' ? 'Basic' : 'Dasar';
 
         itemsHtml += `
           <div class="skill-item">
@@ -67,7 +64,7 @@ const Skills = (() => {
   }
 
   /**
-   * Intersection observer to animate progress bars once they enter viewport
+   * Intersection observer to animate progress bars
    */
   function _initIntersectionObserver() {
     const reveals = container.querySelectorAll('.reveal');
@@ -75,15 +72,11 @@ const Skills = (() => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.classList.add('active');
-          
           const progressFills = entry.target.querySelectorAll('.progress-fill');
           progressFills.forEach(fill => {
             const targetWidth = fill.getAttribute('data-width');
-            setTimeout(() => {
-              fill.style.width = targetWidth;
-            }, 200);
+            setTimeout(() => { fill.style.width = targetWidth; }, 200);
           });
-          
           obs.unobserve(entry.target);
         }
       });

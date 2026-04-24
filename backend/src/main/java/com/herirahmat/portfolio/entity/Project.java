@@ -19,13 +19,19 @@ public class Project {
     private String icon;
     
     @Column(columnDefinition = "TEXT")
-    private String brief;
+    private String briefEn;
+    @Column(columnDefinition = "TEXT")
+    private String briefId;
     
     @Column(columnDefinition = "TEXT")
-    private String problem;
+    private String problemEn;
+    @Column(columnDefinition = "TEXT")
+    private String problemId;
     
     @Column(columnDefinition = "TEXT")
-    private String solution;
+    private String solutionEn;
+    @Column(columnDefinition = "TEXT")
+    private String solutionId;
     
     @Column(columnDefinition = "TEXT")
     private String architecture; // Mermaid diagram string
@@ -35,5 +41,8 @@ public class Project {
     @Column(name = "tech_name")
     private List<String> tech;
 
-    private String result;
+    @Column(columnDefinition = "TEXT")
+    private String resultEn;
+    @Column(columnDefinition = "TEXT")
+    private String resultId;
 }
