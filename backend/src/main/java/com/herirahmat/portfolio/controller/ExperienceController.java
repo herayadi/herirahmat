@@ -10,13 +10,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/experiences")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*") // Allow frontend to access API
 public class ExperienceController {
 
     private final ExperienceRepository experienceRepository;
 
     @GetMapping
     public List<Experience> getAllExperiences() {
-        return experienceRepository.findAll();
+        return experienceRepository.findAllByOrderByStartDateDesc();
     }
 }

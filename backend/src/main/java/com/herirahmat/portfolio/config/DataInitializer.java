@@ -5,9 +5,9 @@ import com.herirahmat.portfolio.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Arrays;
-import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
@@ -18,9 +18,14 @@ public class DataInitializer implements CommandLineRunner {
     private final SkillCategoryRepository skillCategoryRepository;
     private final BlogPostRepository blogPostRepository;
     private final PersonalProfileRepository personalProfileRepository;
+    private final AdminUserRepository adminUserRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) {
+        if (adminUserRepository.count() == 0) {
+            seedAdminUser();
+        }
         if (experienceRepository.count() == 0) {
             seedExperiences();
         }
@@ -36,6 +41,14 @@ public class DataInitializer implements CommandLineRunner {
         if (personalProfileRepository.count() == 0) {
             seedProfile();
         }
+    }
+
+    private void seedAdminUser() {
+        adminUserRepository.save(AdminUser.builder()
+                .username("admin")
+                .password(passwordEncoder.encode("admin123"))
+                .build());
+        System.out.println("[DataInitializer] Default admin user created (admin/admin123)");
     }
 
     private void seedExperiences() {
@@ -66,7 +79,7 @@ public class DataInitializer implements CommandLineRunner {
         projectRepository.save(Project.builder()
                 .title("Enterprise API Gateway")
                 .category("integration")
-                .icon("🏗️")
+                .icon("\uD83C\uDFD7\uFE0F")
                 .briefEn("Centralized API gateway handling authentication, rate limiting, and routing for 50+ microservices.")
                 .briefId("API Gateway terpusat yang menangani otentikasi, pembatasan rate, dan routing untuk 50+ microservices.")
                 .problemEn("Multiple microservices exposed directly to clients, causing security vulnerabilities and inconsistent API contracts.")
@@ -77,12 +90,13 @@ public class DataInitializer implements CommandLineRunner {
                 .tech(Arrays.asList("Spring Cloud Gateway", "OAuth2", "Redis", "Prometheus"))
                 .resultEn("Reduced API latency by 30%, eliminated 95% of unauthorized access attempts.")
                 .resultId("Mengurangi latensi API sebesar 30%, menghilangkan 95% upaya akses tidak sah.")
+                .isPublished(true)
                 .build());
 
         projectRepository.save(Project.builder()
                 .title("Event-Driven Order System")
                 .category("messaging")
-                .icon("🔄")
+                .icon("\uD83D\uDD04")
                 .briefEn("Asynchronous order processing system using event sourcing and CQRS pattern.")
                 .briefId("Sistem pemrosesan pesanan asinkron menggunakan pola event sourcing dan CQRS.")
                 .problemEn("Synchronous order processing caused timeouts during peak hours, losing potential revenue.")
@@ -93,11 +107,12 @@ public class DataInitializer implements CommandLineRunner {
                 .tech(Arrays.asList("Apache Kafka", "Java", "PostgreSQL", "Docker"))
                 .resultEn("Handled 1M+ orders/day with 99.9% reliability, zero timeout during peak.")
                 .resultId("Menangani 1 juta+ pesanan/hari dengan keandalan 99,9%, nol timeout selama puncak.")
+                .isPublished(true)
                 .build());
     }
 
     private void seedSkills() {
-        SkillCategory integration = SkillCategory.builder().title("Integration").icon("🔗").build();
+        SkillCategory integration = SkillCategory.builder().title("Integration").icon("\uD83D\uDD17").build();
         integration.setItems(Arrays.asList(
                 SkillItem.builder().name("REST API").level(90).category(integration).build(),
                 SkillItem.builder().name("GraphQL").level(65).category(integration).build(),
@@ -105,7 +120,7 @@ public class DataInitializer implements CommandLineRunner {
         ));
         skillCategoryRepository.save(integration);
 
-        SkillCategory messaging = SkillCategory.builder().title("Messaging").icon("📨").build();
+        SkillCategory messaging = SkillCategory.builder().title("Messaging").icon("\uD83D\uDCE8").build();
         messaging.setItems(Arrays.asList(
                 SkillItem.builder().name("Apache Kafka").level(90).category(messaging).build(),
                 SkillItem.builder().name("RabbitMQ").level(80).category(messaging).build()
@@ -120,6 +135,7 @@ public class DataInitializer implements CommandLineRunner {
                 .summary("Exploring trends in event-driven architecture and cloud-native integration.")
                 .content("# The Future of Middleware\n\nMiddleware is evolving fast. From simple ESBs to complex **Event-Driven Architectures (EDA)**...\n\n### Key Trends\n- Cloud-Native Integration\n- Serverless Middleware\n- AI-Powered Monitoring")
                 .author("Heri Rahmat")
+                .isPublished(true)
                 .build());
     }
 

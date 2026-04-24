@@ -10,13 +10,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/projects")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class ProjectController {
 
     private final ProjectRepository projectRepository;
 
     @GetMapping
-    public List<Project> getAllProjects() {
-        return projectRepository.findAll();
+    public List<Project> getPublishedProjects() {
+        return projectRepository.findByIsPublishedTrue();
     }
 }

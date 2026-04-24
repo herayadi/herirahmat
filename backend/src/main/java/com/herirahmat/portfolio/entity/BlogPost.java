@@ -26,6 +26,11 @@ public class BlogPost {
     private String content; // Markdown content
 
     private String author;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean isPublished = false;
+
     private LocalDateTime publishedAt;
 
     @PrePersist

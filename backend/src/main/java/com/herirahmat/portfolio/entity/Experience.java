@@ -17,7 +17,11 @@ public class Experience {
     private String company;
     private String roleEn;
     private String roleId;
-    private String period;
+    
+    private java.time.LocalDate startDate;
+    private java.time.LocalDate endDate;
+    private boolean isCurrent;
+    private String period; // Legacy support
     
     @Column(columnDefinition = "TEXT")
     private String descriptionEn;

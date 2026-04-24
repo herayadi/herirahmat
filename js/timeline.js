@@ -40,13 +40,23 @@ const Timeline = (() => {
       const description = lang === 'en' ? (exp.descriptionEn || exp.description) : (exp.descriptionId || exp.description);
       const impactTitle = lang === 'en' ? 'Key Impact' : 'Dampak Utama';
 
+      // Date Formatting
+      const formatPeriod = (e) => {
+        if (!e.startDate) return e.period || '';
+        const start = new Date(e.startDate).toLocaleDateString(lang === 'en' ? 'en-US' : 'id-ID', { month: 'short', year: 'numeric' });
+        if (e.current) return `${start} — ${lang === 'en' ? 'Present' : 'Sekarang'}`;
+        if (!e.endDate) return start;
+        const end = new Date(e.endDate).toLocaleDateString(lang === 'en' ? 'en-US' : 'id-ID', { month: 'short', year: 'numeric' });
+        return `${start} — ${end}`;
+      };
+
       html += `
         <div class="timeline-item reveal" style="transition-delay: ${index * 100}ms">
           <div class="timeline-marker"></div>
           <div class="timeline-content-wrapper">
             <div class="${cardClass}">
               <div class="timeline-header">
-                <span class="timeline-date">${exp.period}</span>
+                <span class="timeline-date">${formatPeriod(exp)}</span>
                 <h3 class="timeline-role">${role}</h3>
                 <div class="timeline-company">${exp.company}</div>
               </div>

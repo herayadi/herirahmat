@@ -11,19 +11,18 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/posts")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 public class BlogController {
 
     private final BlogPostRepository blogPostRepository;
 
     @GetMapping
-    public List<BlogPost> getAllPosts() {
-        return blogPostRepository.findAll();
+    public List<BlogPost> getPublishedPosts() {
+        return blogPostRepository.findByIsPublishedTrue();
     }
 
     @GetMapping("/{slug}")
     public ResponseEntity<BlogPost> getPostBySlug(@PathVariable String slug) {
-        return blogPostRepository.findBySlug(slug)
+        return blogPostRepository.findBySlugAndIsPublishedTrue(slug)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

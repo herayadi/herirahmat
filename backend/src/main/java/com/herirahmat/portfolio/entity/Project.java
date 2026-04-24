@@ -45,4 +45,8 @@ public class Project {
     private String resultEn;
     @Column(columnDefinition = "TEXT")
     private String resultId;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean isPublished = false;
 }
