@@ -21,15 +21,16 @@ const Skills = (() => {
    * Render Skills DOM
    */
   function _renderContent(skillsData) {
-    // skillsData is an object with categories as keys
+    // If backend returns Array, iterate properly. 
+    // If it's the static object fallback, Object.values will handle it.
+    const categories = Array.isArray(skillsData) ? skillsData : Object.values(skillsData);
+    
     let html = '';
     
-    let index = 0;
-    for (const [key, category] of Object.entries(skillsData)) {
+    categories.forEach((category, index) => {
       let itemsHtml = '';
       
       category.items.forEach(skill => {
-        // Convert percentage to a human readable level term for tooltip
         let levelTerm = 'Basic';
         if (skill.level >= 85) levelTerm = 'Expert';
         else if (skill.level >= 70) levelTerm = 'Advanced';
@@ -60,8 +61,7 @@ const Skills = (() => {
           </div>
         </div>
       `;
-      index++;
-    }
+    });
     
     container.innerHTML = html;
   }
@@ -76,11 +76,9 @@ const Skills = (() => {
         if (entry.isIntersecting) {
           entry.target.classList.add('active');
           
-          // Animate the progress bars inside this specific card
           const progressFills = entry.target.querySelectorAll('.progress-fill');
           progressFills.forEach(fill => {
             const targetWidth = fill.getAttribute('data-width');
-            // Give a tiny delay so the card reveal happens just before bars start moving
             setTimeout(() => {
               fill.style.width = targetWidth;
             }, 200);

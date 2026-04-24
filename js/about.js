@@ -25,9 +25,11 @@ const About = (() => {
 
     // 1. Bio & Image Layout
     const bioParagraphs = about.bio.map((text) => `<p>${text}</p>`).join("");
-    // Use an emoji as fallback if no actual image file is supplied yet in dummy data
-    const avatarHtml = personal.avatar
-      ? `<img src="${personal.avatar}" alt="${personal.name}" loading="lazy" style="width:100%;height:100%;object-fit:cover;">`
+    
+    // Backend uses avatarUrl
+    const avatarSrc = personal.avatarUrl || personal.avatar;
+    const avatarHtml = avatarSrc
+      ? `<img src="${avatarSrc}" alt="${personal.name}" loading="lazy" style="width:100%;height:100%;object-fit:cover;">`
       : `🧊`;
 
     const layoutHtml = `
@@ -57,24 +59,23 @@ const About = (() => {
     });
     philosophyHtml += "</div>";
 
-    // 3. Stats Counter
-    // let statsHtml = '<div class="stats-grid reveal" style="transition-delay: 200ms">';
-    // about.stats.forEach((stat, index) => {
-    //   statsHtml += `
-    //     <div class="stat-item">
-    //       <div class="stat-value-container">
-    //         <span class="stat-value" data-target="${stat.value}">0</span>
-    //         <span class="stat-suffix">${stat.suffix}</span>
-    //       </div>
-    //       <div class="stat-label">${stat.label}</div>
-    //     </div>
-    //   `;
-    // });
-    // statsHtml += '</div>';
+    // 3. Stats Counter (Re-enabled)
+    let statsHtml = '<div class="stats-grid reveal" style="transition-delay: 200ms">';
+    about.stats.forEach((stat, index) => {
+      statsHtml += `
+        <div class="stat-item">
+          <div class="stat-value-container">
+            <span class="stat-value" data-target="${stat.value}">0</span>
+            <span class="stat-suffix">${stat.suffix}</span>
+          </div>
+          <div class="stat-label">${stat.label}</div>
+        </div>
+      `;
+    });
+    statsHtml += '</div>';
 
     // Append all parts
-    container.innerHTML = layoutHtml + philosophyHtml;
-    // container.innerHTML = layoutHtml + philosophyHtml + statsHtml;
+    container.innerHTML = layoutHtml + philosophyHtml + statsHtml;
   }
 
   /**
@@ -116,9 +117,7 @@ const About = (() => {
 
     statValues.forEach((element) => {
       const target = parseFloat(element.getAttribute("data-target"));
-      // Handle decimals too
       const isDecimal = target % 1 !== 0;
-      let startValue = 0;
       let startTime = null;
 
       function updateCounter(currentTime) {
@@ -128,7 +127,7 @@ const About = (() => {
 
         // Easing out function
         const easeOut = 1 - Math.pow(1 - progress, 3);
-        const currentValue = startValue + (target - startValue) * easeOut;
+        const currentValue = 0 + (target - 0) * easeOut;
 
         element.innerText = isDecimal
           ? currentValue.toFixed(1)

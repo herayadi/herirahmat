@@ -23,15 +23,12 @@ const Projects = (() => {
     _renderGrid('all');
     _bindEvents();
     
-    // Initialize Mermaid.js configuration
     if (typeof mermaid !== 'undefined') {
       _initMermaid();
-      // Also observe theme changes to re-init mermaid with new theme
       const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
           if (mutation.attributeName === 'data-theme') {
             _initMermaid();
-            // If modal is open, re-render the diagram
             if (modalOverlay.classList.contains('active')) {
               _reRenderActiveMermaid();
             }
@@ -41,32 +38,21 @@ const Projects = (() => {
       observer.observe(document.documentElement, { attributes: true });
     }
 
-    // Call reveal observer again for newly added elements
     _initIntersectionObserver();
-    
     console.log('[Projects] Initialized');
   }
 
-  /**
-   * Render Filter Buttons
-   */
   function _renderFilters() {
-    // Get unique categories
     const categories = ['all', ...new Set(projectsData.map(p => p.category))];
-    
     let html = '';
     categories.forEach(cat => {
       const label = cat.charAt(0).toUpperCase() + cat.slice(1);
       const activeClass = cat === 'all' ? 'active' : '';
       html += `<button class="filter-btn ${activeClass}" data-filter="${cat}">${label}</button>`;
     });
-    
     filterContainer.innerHTML = html;
   }
 
-  /**
-   * Render Projects Grid
-   */
   function _renderGrid(filter) {
     let filteredData = projectsData;
     if (filter !== 'all') {
@@ -75,7 +61,9 @@ const Projects = (() => {
     
     let html = '';
     filteredData.forEach((project, index) => {
-      const techHtml = project.tech.slice(0, 3).map(t => `<span class="tag">${t}</span>`).join('');
+      // Backend uses techStack
+      const tech = project.techStack || project.tech || [];
+      const techHtml = tech.slice(0, 3).map(t => `<span class="tag">${t}</span>`).join('');
       
       html += `
         <div class="card project-card reveal" data-id="${project.id}" style="transition-delay: ${index * 100}ms">
@@ -84,7 +72,7 @@ const Projects = (() => {
           <p class="project-brief">${project.brief}</p>
           <div class="project-tech">
             ${techHtml}
-            ${project.tech.length > 3 ? `<span class="tag">+${project.tech.length - 3}</span>` : ''}
+            ${tech.length > 3 ? `<span class="tag">+${tech.length - 3}</span>` : ''}
           </div>
           <div class="project-link">
             <span>View Case Study</span>
@@ -99,24 +87,18 @@ const Projects = (() => {
     
     gridContainer.innerHTML = html;
     
-    // Re-bind modal click events for new grid items
     const cards = gridContainer.querySelectorAll('.project-card');
     cards.forEach(card => {
       card.addEventListener('click', () => _openModal(card.getAttribute('data-id')));
     });
 
-    // Manually trigger reveal for filtered items if they haven't been observed
     setTimeout(() => {
       const reveals = gridContainer.querySelectorAll('.reveal');
       reveals.forEach(r => r.classList.add('active'));
     }, 50);
   }
 
-  /**
-   * Bind Events (Filters, Modal closing)
-   */
   function _bindEvents() {
-    // Filter click
     filterContainer.addEventListener('click', (e) => {
       if (e.target.classList.contains('filter-btn')) {
         const btns = filterContainer.querySelectorAll('.filter-btn');
@@ -124,7 +106,6 @@ const Projects = (() => {
         e.target.classList.add('active');
         
         currentFilter = e.target.getAttribute('data-filter');
-        // Fade out grid slightly, then re-render
         gridContainer.style.opacity = '0';
         setTimeout(() => {
           _renderGrid(currentFilter);
@@ -133,37 +114,32 @@ const Projects = (() => {
       }
     });
 
-    // Close Modal via Overlay click
     modalOverlay.addEventListener('click', (e) => {
-      if (e.target === modalOverlay) {
-        _closeModal();
-      }
+      if (e.target === modalOverlay) _closeModal();
     });
     
-    // Close Modal via Escape key
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && modalOverlay.classList.contains('active')) {
-        _closeModal();
-      }
+      if (e.key === 'Escape' && modalOverlay.classList.contains('active')) _closeModal();
     });
   }
 
-  /**
-   * Open Modal and render specific project details
-   */
   function _openModal(projectId) {
-    const project = projectsData.find(p => p.id === projectId);
+    // Non-strict comparison because data-id is string and project.id is number
+    const project = projectsData.find(p => p.id == projectId);
     if (!project) return;
     
-    const techHtml = project.tech.map(t => `<span class="tag">${t}</span>`).join('');
+    const tech = project.techStack || project.tech || [];
+    const techHtml = tech.map(t => `<span class="tag">${t}</span>`).join('');
     
+    // Backend uses mermaidDiagram
+    const architecture = project.mermaidDiagram || project.architecture;
     let diagramHtml = '';
-    if (project.architecture) {
+    if (architecture) {
       diagramHtml = `
         <div class="modal-section">
           <h3>Architecture Map</h3>
           <div class="modal-architecture mermaid" id="mermaid-container">
-            ${project.architecture}
+            ${architecture}
           </div>
         </div>
       `;
@@ -202,16 +178,11 @@ const Projects = (() => {
     `;
 
     modalContent.innerHTML = html;
-    
-    // Bind close button
     document.getElementById('modal-close-btn').addEventListener('click', _closeModal);
-    
-    // Show Modal
     modalOverlay.classList.add('active');
-    document.body.style.overflow = 'hidden'; // Prevent background scrolling
+    document.body.style.overflow = 'hidden';
     
-    // Render Mermaid diagram
-    if (typeof mermaid !== 'undefined' && project.architecture) {
+    if (typeof mermaid !== 'undefined' && architecture) {
       setTimeout(() => {
          mermaid.run({
             nodes: [document.getElementById('mermaid-container')]
@@ -220,13 +191,9 @@ const Projects = (() => {
     }
   }
 
-  /**
-   * Close Modal
-   */
   function _closeModal() {
     modalOverlay.classList.remove('active');
     document.body.style.overflow = '';
-    // Clear content after animation
     setTimeout(() => {
       if (!modalOverlay.classList.contains('active')) {
         modalContent.innerHTML = '';
@@ -234,14 +201,9 @@ const Projects = (() => {
     }, 400);
   }
 
-  /**
-   * Initialize Mermaid settings based on theme
-   */
   function _initMermaid() {
     if (typeof mermaid === 'undefined') return;
-    
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    
     mermaid.initialize({
       startOnLoad: false,
       theme: isDark ? 'dark' : 'default',
@@ -250,22 +212,10 @@ const Projects = (() => {
     });
   }
   
-  /**
-   * Re-render mermaid diagram in modal if theme changes
-   */
   function _reRenderActiveMermaid() {
-       const container = document.getElementById('mermaid-container');
-       if (container) {
-           // We'd have to find the active project's raw mermaid string again to re-render, 
-           // since mermaid modifies the DOM. For simplicity in this demo, just let it be 
-           // or re-process by getting the raw string from currently viewed data id.
-           // A simpler approach is to close the modal or force a manual re-open.
-       }
+    // Optional: Re-render logic
   }
 
-  /**
-   * Observer for smooth reveal
-   */
   function _initIntersectionObserver() {
     const reveals = document.querySelectorAll('.projects-filter.reveal, .projects-grid.reveal');
     const observer = new IntersectionObserver((entries, obs) => {
@@ -276,7 +226,6 @@ const Projects = (() => {
         }
       });
     }, { threshold: 0.1 });
-
     reveals.forEach(element => observer.observe(element));
   }
 
